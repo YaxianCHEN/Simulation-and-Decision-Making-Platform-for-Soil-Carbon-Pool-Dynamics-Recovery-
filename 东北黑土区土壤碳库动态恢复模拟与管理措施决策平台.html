@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>碳盾系统 - 东北黑土区土壤碳库动态恢复模拟</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a9eff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="碳盾系统">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+    <style>
+        :root {
+            --primary: #1a2a3a;
+            --secondary: #2d4a5e;
+            --accent: #4a9eff;
+            --accent2: #00d9a5;
+            --surface: #0d1b2a;
+            --surface2: #1b2838;
+            --text: #e8e8e8;
+            --text-muted: #8899aa;
+            --border: #3d5a73;
+            --success: #00d9a5;
+            --warning: #ffc107;
+            --danger: #e94560;
+            --gradient-1: linear-gradient(135deg, #4a9eff 0%, #00d9a5 100%);
+            --gradient-2: linear-gradient(135deg, #1a2a3a 0%, #2d4a5e 100%);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .header-banner {
+            background: linear-gradient(135deg, #1a2a4a 0%, #0d1b2a 100%);
+            border-bottom: 1px solid #2d4a6a;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #00c853 0%, #00a040 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #00d9a5;
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .header-info {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #e8e8e8;
+            line-height: 1.6;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-title {
+            text-align: left;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .page-title h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title h2::before {
+            content: '';
+            width: 4px;
+            height: 1.2rem;
+            background: var(--gradient-1);
+            border-radius: 2px;
+        }
+
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            padding-left: 1.25rem;
+        }
+
+        .section-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .param-badge {
+            background: #007bff;
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 0.85rem 1rem;
+            background: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
+        }
+
+        .form-select {
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.85rem 1.75rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 158, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--primary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            background: rgba(74, 158, 255, 0.1);
+        }
+
+        .formula-display {
+            background: var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .formula-main {
+            font-size: 1.3rem;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(74, 158, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border: 1px dashed var(--accent);
+        }
+
+        .formula-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .formula-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .formula-item.highlight {
+            border-color: var(--accent);
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .formula-symbol {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .formula-details h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            color: var(--accent);
+        }
+
+        .formula-details p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .formula-details .value-tag {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-card {
+            background: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient-1);
+        }
+
+        .result-card.highlight::before {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-unit {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            background: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table tr:hover td {
+            background: rgba(74, 158, 255, 0.05);
+        }
+
+        .chart-container {
+            background: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            height: 350px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem;
+            background: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: var(--gradient-1);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: var(--primary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .info-card h4 {
+            font-size: 0.95rem;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-list li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .param-flow {
+            background: var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .flow-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+            background: var(--surface2);
+            border-radius: 10px;
+        }
+
+        .flow-box {
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .research-note {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            box-shadow: var(--shadow);
+        }
+
+        .research-note strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .formula-breakdown {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .header-info {
+                text-align: center;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header-banner">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">🌾</div>
+                <div class="logo-text">
+                    <h1>东北黑土区农田土壤有机碳模拟系统</h1>
+                </div>
+            </div>
+            <div class="header-info">
+                <div>研究区域：黑龙江省嫩江市鹤山农场九三水土保持试验站</div>
+                <div>数据来源：长期定位试验观测数据</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="research-note">
+            <strong>研究说明：</strong>本系统基于东北黑土区农田长期定位试验数据，数据来源为黑龙江省嫩江市鹤山农场九三水土保持试验站的侵蚀模拟小区。系统专注于不同侵蚀强度（0-70cm）和施肥处理（施肥/不施肥）条件下的土壤有机碳（SOC）变化特征分析。
+        </div>
+
+        <div class="page-title">
+            <h2>东北黑土区农田土壤有机碳模拟系统</h2>
+            <p>输入土壤参数，系统将自动计算SOC含量及碳库变化</p>
+        </div>
+
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">⚙️</div>
+                <div class="section-title">基本参数输入</div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">
+                        施肥处理 <span class="param-badge">Fert</span>
+                    </label>
+                    <select id="fert" class="form-select">
+                        <option value="F">施肥 (F)</option>
+                        <option value="UNF">不施肥 (UNF)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        侵蚀强度 (cm) <span class="param-badge">Erosion</span>
+                    </label>
+                    <select id="erosion" class="form-select">
+                        <option value="0">0 cm - 无侵蚀</option>
+                        <option value="10">10 cm - 轻度侵蚀</option>
+                        <option value="20">20 cm - 轻度侵蚀</option>
+                        <option value="30">30 cm - 中度侵蚀</option>
+                        <option value="40">40 cm - 中度侵蚀</option>
+                        <option value="50">50 cm - 重度侵蚀</option>
+                        <option value="60">60 cm - 重度侵蚀</option>
+                        <option value="70">70 cm - 极重度侵蚀</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        土层深度 (cm) <span class="param-badge">Depth</span>
+                    </label>
+                    <select id="depth" class="form-select">
+                        <option value="10">0-20 cm (表层)</option>
+                        <option value="25">20-30 cm (亚表层)</option>
+                        <option value="35">30-40 cm (中层)</option>
+                        <option value="45">40-50 cm (深层)</option>
+                        <option value="55">50-60 cm (底层)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        土壤容重 (g/cm³) <span class="param-badge">BD</span>
+                    </label>
+                    <input type="number" id="bd" class="form-input" placeholder="1.15" step="0.01" value="1.15">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        pH值 <span class="param-badge">pH</span>
+                    </label>
+                    <input type="number" id="ph" class="form-input" placeholder="5.60" step="0.01" value="5.60">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        含水量 (%) <span class="param-badge">WC</span>
+                    </label>
+                    <input type="number" id="wc" class="form-input" placeholder="18.00" step="0.1" value="18.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        黏+粉粒含量 (%) <span class="param-badge">Clay</span>
+                    </label>
+                    <input type="number" id="clay" class="form-input" placeholder="96.29" step="0.1" value="96.29">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        全氮含量 (g/kg) <span class="param-badge">TN</span>
+                    </label>
+                    <input type="number" id="tn" class="form-input" placeholder="1.59" step="0.01" value="1.59">
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="calculateBtn">
+                    <span>🧮</span>
+                    <span>执行计算</span>
+                </button>
+                <button class="btn btn-secondary" id="validateBtn">
+                    <span>✅</span>
+                    <span>验证参数</span>
+                </button>
+                <button class="btn btn-secondary" id="clearBtn">
+                    <span>🔄</span>
+                    <span>重置</span>
+                </button>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">📐</div>
+                    <div class="section-title">公式库 - 各参数在公式中的位置与作用</div>
+                </div>
+
+                <div class="formula-display">
+                    <div class="formula-main">
+                        SOC = 基础SOC值 × 侵蚀系数 × 施肥系数 × 深度系数
+                    </div>
+
+                    <div class="formula-breakdown">
+                        <div class="formula-item highlight">
+                            <div class="formula-symbol">SOC</div>
+                            <div class="formula-details">
+                                <h4>土壤有机碳含量 (g/kg)</h4>
+                                <p>核心输出指标，反映土壤碳库水平</p>
+                                <span class="value-tag">输出结果</span>
+                            </div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="formula-symbol">BD</div>
+                            <div class="formula-details">
+                                <h4>土壤容重 (g/cm³)</h4>
+                                <p>影响SOC测定结果的校正因子</p>
+                                <span class="value-tag">输入参数</span>
+                            </div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="formula-symbol">E</div>
+                            <div class="formula-details">
+                                <h4>侵蚀强度 (cm)</h4>
+                                <p>侵蚀强度每增加10cm，SOC约降低15-25%</p>
+                                <span class="value-tag">输入参数</span>
+                            </div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="formula-symbol">F</div>
+                            <div class="formula-details">
+                                <h4>施肥处理</h4>
+                                <p>施肥(F) vs 不施肥(UNF)影响SOC变化速率</p>
+                                <span class="value-tag">输入参数</span>
+                            </div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="formula-symbol">D</div>
+                            <div class="formula-details">
+                                <h4>土层深度 (cm)</h4>
+                                <p>SOC含量随深度增加呈指数衰减</p>
+                                <span class="value-tag">输入参数</span>
+                            </div>
+                        </div>
+                        <div class="formula-item">
+                            <div class="formula-symbol">WC</div>
+                            <div class="formula-details">
+                                <h4>含水量 (%)</h4>
+                                <p>影响有机质分解速率和碳矿化</p>
+                                <span class="value-tag">输入参数</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="param-flow">
+                    <div class="flow-title">📊 参数流向与计算过程</div>
+                    <div class="flow-diagram">
+                        <div class="flow-box">施肥处理(F)</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-box">侵蚀强度(E)</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-box">土层深度(D)</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-box">基础SOC</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-box">校正计算</div>
+                        <span class="flow-arrow">→</span>
+                        <div class="flow-box">最终SOC</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card" id="resultsSection">
+                <div class="section-header">
+                    <div class="section-icon">📈</div>
+                    <div class="section-title">计算结果</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card highlight">
+                        <div class="result-label">土壤有机碳含量 (SOC)</div>
+                        <div class="result-value" id="socValue">--</div>
+                        <div class="result-unit">g/kg</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">碳库储量</div>
+                        <div class="result-value" id="carbonValue">--</div>
+                        <div class="result-unit">kg C/m²</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">碳库净变化量</div>
+                        <div class="result-value" id="netChangeValue">--</div>
+                        <div class="result-unit">kg C/m²</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">年恢复速率</div>
+                        <div class="result-value" id="recoveryRateValue">--</div>
+                        <div class="result-unit">kg C/m²/年</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">碳密度</div>
+                        <div class="result-value" id="densityValue">--</div>
+                        <div class="result-unit">kg C/m³</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">SOC损失率</div>
+                        <div class="result-value" id="lossRateValue">--</div>
+                        <div class="result-unit">%</div>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>参数名称</th>
+                                <th>符号</th>
+                                <th>数值</th>
+                                <th>单位</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">📊</div>
+                    <div class="section-title">实测数据对比</div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="erosionChart">侵蚀强度影响</button>
+                    <button class="tab" data-tab="depthChart">深度分布</button>
+                    <button class="tab" data-tab="timeChart">时间变化</button>
+                    <button class="tab" data-tab="compareTable">数据对照表</button>
+                </div>
+
+                <div id="erosionChart" class="tab-content active">
+                    <div class="chart-container">
+                        <canvas id="erosionChartCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div id="depthChart" class="tab-content">
+                    <div class="chart-container">
+                        <canvas id="depthChartCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div id="timeChart" class="tab-content">
+                    <div class="chart-container">
+                        <canvas id="timeChartCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div id="compareTable" class="tab-content">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>施肥处理</th>
+                                <th>侵蚀强度(cm)</th>
+                                <th>表层SOC(g/kg)</th>
+                                <th>亚表层SOC(g/kg)</th>
+                                <th>中层SOC(g/kg)</th>
+                                <th>深层SOC(g/kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compareTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon">📋</div>
+                    <div class="section-title">研究区域数据说明</div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>📍 研究区域</h4>
+                        <ul class="info-list">
+                            <li><span>地点</span><span>黑龙江省嫩江市鹤山农场九三水土保持试验站</span></li>
+                            <li><span>纬度</span><span>49°00'42"N (49.0117°N)</span></li>
+                            <li><span>经度</span><span>125°19'24"E (125.3233°E)</span></li>
+                            <li><span>海拔</span><span>240 m</span></li>
+                            <li><span>气候</span><span>温带大陆性季风气候</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h4>🌾 农田管理</h4>
+                        <ul class="info-list">
+                            <li><span>作物</span><span>玉米连作</span></li>
+                            <li><span>施肥</span><span>N 150 kg/ha, P₂O₅ 75 kg/ha</span></li>
+                            <li><span>不施肥</span><span>对照处理</span></li>
+                            <li><span>轮作</span><span>玉米-大豆轮作</span></li>
+                            <li><span>研究年限</span><span>20年(2004-2024)</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h4>🌱 土壤特征</h4>
+                        <ul class="info-list">
+                            <li><span>土壤类型</span><span>黑土</span></li>
+                            <li><span>质地</span><span>黏土/粉砂</span></li>
+                            <li><span>pH范围</span><span>5.4-6.5</span></li>
+                            <li><span>初始SOC</span><span>23.9 g/kg (0侵蚀)</span></li>
+                            <li><span>容重范围</span><span>1.0-1.4 g/cm³</span></li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h4>📊 数据来源</h4>
+                        <ul class="info-list">
+                            <li><span>数据来源</span><span>长期定位试验</span></li>
+                            <li><span>采样深度</span><span>0-60 cm</span></li>
+                            <li><span>侵蚀梯度</span><span>0, 10, 20, 30, 40, 50, 60, 70 cm</span></li>
+                            <li><span>测定方法</span><span>重铬酸钾氧化法</span></li>
+                            <li><span>发表论文</span><span>硕士论文(2026)</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const SOCCalculator = {
+                baseData: {
+                    F: {
+                        0: { 10: 23.90, 25: 16.64, 35: 13.09, 45: 10.30, 55: 8.10 },
+                        10: { 10: 17.64, 25: 10.16, 35: 7.09, 45: 4.91, 55: 5.89 },
+                        20: { 10: 11.77, 25: 8.48, 35: 6.84, 45: 5.77, 55: 4.94 },
+                        30: { 10: 9.30, 25: 12.62, 35: 8.93, 45: 7.47, 55: 7.06 },
+                        40: { 10: 12.51, 25: 11.50, 35: 8.80, 45: 8.28, 55: 6.50 },
+                        50: { 10: 19.92, 25: 13.39, 35: 11.54, 45: 9.94, 55: 7.17 },
+                        60: { 10: 8.82, 25: 9.81, 35: 8.36, 45: 8.20, 55: 6.79 },
+                        70: { 10: 7.40, 25: 9.81, 35: 7.95, 45: 7.46, 55: 7.70 }
+                    },
+                    UNF: {
+                        0: { 10: 23.90, 25: 17.71, 35: 15.03, 45: 8.34, 55: 10.58 },
+                        10: { 10: 17.64, 25: 18.31, 35: 12.43, 45: 9.04, 55: 7.89 },
+                        20: { 10: 21.03, 25: 17.02, 35: 15.03, 45: 11.93, 55: 9.47 },
+                        30: { 10: 13.76, 25: 13.45, 35: 10.54, 45: 8.52, 55: 7.81 },
+                        40: { 10: 13.16, 25: 14.08, 35: 10.91, 45: 9.04, 55: 7.71 },
+                        50: { 10: 12.41, 25: 14.52, 35: 12.15, 45: 10.19, 55: 8.26 },
+                        60: { 10: 10.53, 25: 10.80, 35: 8.80, 45: 8.30, 55: 7.21 },
+                        70: { 10: 12.81, 25: 13.24, 35: 11.36, 45: 9.38, 55: 8.56 }
+                    }
+                },
+
+                erosionCoefficients: {
+                    0: 1.00, 10: 0.74, 20: 0.49, 30: 0.39, 40: 0.52, 50: 0.83, 60: 0.37, 70: 0.31
+                },
+
+                fertilizerEffect: {
+                    'F': { factor: 1.0, desc: '施肥处理' },
+                    'UNF': { factor: 0.92, desc: '不施肥处理' }
+                },
+
+                depthFactor: {
+                    10: 1.00, 25: 0.70, 35: 0.55, 45: 0.43, 55: 0.34
+                },
+
+                validateInput(params) {
+                    const errors = [];
+                    if (params.bd < 0.5 || params.bd > 2.5) errors.push('土壤容重应在0.5-2.5 g/cm³范围内');
+                    if (params.ph < 3 || params.ph > 11) errors.push('pH值应在3-11范围内');
+                    if (params.wc < 0 || params.wc > 100) errors.push('含水量应在0-100%范围内');
+                    if (params.clay < 0 || params.clay > 100) errors.push('黏粉粒含量应在0-100%范围内');
+                    if (params.tn < 0 || params.tn > 10) errors.push('全氮含量应在0-10 g/kg范围内');
+                    return errors;
+                },
+
+                calculateSOC(params) {
+                    const fert = params.fert;
+                    const erosion = parseInt(params.erosion);
+                    const depth = parseInt(params.depth);
+                    const erosionCoeff = this.erosionCoefficients[erosion] || 1.0;
+                    const fertFactor = this.fertilizerEffect[fert].factor;
+                    const depthFactor = this.depthFactor[depth] || 0.5;
+                    const baseSOC = this.baseData[fert][erosion][depth] || 10.0;
+                    const calculatedSOC = baseSOC * erosionCoeff * fertFactor;
+                    return Math.max(0, calculatedSOC);
+                },
+
+                calculateCarbonStorage(params, soc) {
+                    const bd = parseFloat(params.bd);
+                    const depth = parseInt(params.depth);
+                    return Math.max(0, (soc * bd * 20) / 100);
+                },
+
+                calculateCarbonDensity(params, carbonStorage) {
+                    const depth = parseInt(params.depth);
+                    return Math.max(0, carbonStorage / (depth / 100));
+                },
+
+                calculateNetChange(params, soc) {
+                    const fert = params.fert;
+                    const erosion = parseInt(params.erosion);
+                    const baseSoc = this.baseData['F'][0][10];
+                    const currentSoc = soc;
+                    const erosionImpact = (erosion / 70) * 0.3;
+                    const fertImpact = fert === 'F' ? 0.05 : -0.02;
+                    return currentSoc * (1 + fertImpact - erosionImpact);
+                },
+
+                calculateRecoveryRate(netChange, years = 20) {
+                    return Math.max(0, netChange / years);
+                },
+
+                calculateLossRate(params, soc) {
+                    const fert = params.fert;
+                    const erosion = parseInt(params.erosion);
+                    const baseSoc = this.baseData[fert][0][10];
+                    const lossRate = ((baseSoc - soc) / baseSoc) * 100;
+                    return Math.max(0, lossRate);
+                },
+
+                computeAll(params) {
+                    const errors = this.validateInput(params);
+                    if (errors.length > 0) return { success: false, errors };
+
+                    const soc = this.calculateSOC(params);
+                    const carbonStorage = this.calculateCarbonStorage(params, soc);
+                    const carbonDensity = this.calculateCarbonDensity(params, carbonStorage);
+                    const netChange = this.calculateNetChange(params, soc);
+                    const recoveryRate = this.calculateRecoveryRate(netChange);
+                    const lossRate = this.calculateLossRate(params, soc);
+
+                    return {
+                        success: true,
+                        results: {
+                            soc: soc.toFixed(2),
+                            carbonStorage: carbonStorage.toFixed(2),
+                            carbonDensity: carbonDensity.toFixed(2),
+                            netChange: netChange.toFixed(2),
+                            recoveryRate: recoveryRate.toFixed(3),
+                            lossRate: lossRate.toFixed(1)
+                        },
+                        params
+                    };
+                }
+            };
+
+            let currentResults = null;
+            let erosionChart, depthChart, timeChart;
+
+            function getFormParams() {
+                return {
+                    fert: document.getElementById('fert').value,
+                    erosion: document.getElementById('erosion').value,
+                    depth: document.getElementById('depth').value,
+                    bd: parseFloat(document.getElementById('bd').value) || 1.15,
+                    ph: parseFloat(document.getElementById('ph').value) || 5.60,
+                    wc: parseFloat(document.getElementById('wc').value) || 18.00,
+                    clay: parseFloat(document.getElementById('clay').value) || 96.29,
+                    tn: parseFloat(document.getElementById('tn').value) || 1.59
+                };
+            }
+
+            function performCalculation() {
+                const params = getFormParams();
+                const result = SOCCalculator.computeAll(params);
+
+                if (!result.success) {
+                    alert('参数验证失败：' + result.errors.join('；'));
+                    return;
+                }
+
+                currentResults = result;
+
+                document.getElementById('socValue').textContent = result.results.soc;
+                document.getElementById('carbonValue').textContent = result.results.carbonStorage;
+                document.getElementById('netChangeValue').textContent = result.results.netChange;
+                document.getElementById('recoveryRateValue').textContent = result.results.recoveryRate;
+                document.getElementById('densityValue').textContent = result.results.carbonDensity;
+                document.getElementById('lossRateValue').textContent = result.results.lossRate;
+
+                updateResultTable(result);
+                updateCharts(params);
+                scrollToResults();
+            }
+
+            function updateResultTable(result) {
+                const tbody = document.getElementById('resultTableBody');
+                const fertLabel = result.params.fert === 'F' ? '施肥' : '不施肥';
+                const depthLabel = { '10': '0-20 cm (表层)', '25': '20-30 cm (亚表层)', '35': '30-40 cm (中层)', '45': '40-50 cm (深层)', '55': '50-60 cm (底层)' }[result.params.depth] || '';
+
+                const rows = [
+                    { name: '土壤有机碳含量', symbol: 'SOC', value: result.results.soc, unit: 'g/kg', note: '核心指标' },
+                    { name: '土壤碳库储量', symbol: 'C_storage', value: result.results.carbonStorage, unit: 'kg C/m²', note: '单位面积碳储量' },
+                    { name: '碳库净变化量', symbol: 'ΔC', value: result.results.netChange, unit: 'kg C/m²', note: '相对变化量' },
+                    { name: '年恢复速率', symbol: 'R_rate', value: result.results.recoveryRate, unit: 'kg C/m²/年', note: '年均变化' },
+                    { name: '碳密度', symbol: 'C_density', value: result.results.carbonDensity, unit: 'kg C/m³', note: '体积密度' },
+                    { name: 'SOC损失率', symbol: 'Loss', value: result.results.lossRate, unit: '%', note: '相对损失' },
+                    { name: '施肥处理', symbol: 'Fert', value: fertLabel, unit: '-', note: result.params.fert === 'F' ? '施氮肥' : '对照' },
+                    { name: '侵蚀强度', symbol: 'Erosion', value: result.params.erosion + ' cm', unit: '-', note: '土壤侵蚀深度' },
+                    { name: '土层深度', symbol: 'Depth', value: depthLabel, unit: '-', note: '采样深度' },
+                    { name: '土壤容重', symbol: 'BD', value: result.params.bd, unit: 'g/cm³', note: '实测值' }
+                ];
+
+                tbody.innerHTML = rows.map(r => `<tr><td>${r.name}</td><td>${r.symbol}</td><td>${r.value}</td><td>${r.unit}</td><td>${r.note}</td></tr>`).join('');
+            }
+
+            function updateCharts(params) {
+                const fert = params.fert;
+                const erosion = parseInt(params.erosion);
+
+                updateErosionChart(fert);
+                updateDepthChart(fert, erosion);
+                updateTimeChart();
+                updateCompareTable();
+            }
+
+            function updateErosionChart(fert) {
+                const ctx = document.getElementById('erosionChartCanvas').getContext('2d');
+                const erosionLevels = [0, 10, 20, 30, 40, 50, 60, 70];
+                const socValues = erosionLevels.map(e => SOCCalculator.baseData[fert][e][10]);
+
+                if (erosionChart) erosionChart.destroy();
+                erosionChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: erosionLevels.map(e => e + ' cm'),
+                        datasets: [{
+                            label: fert === 'F' ? '施肥处理 SOC' : '不施肥处理 SOC',
+                            data: socValues,
+                            backgroundColor: 'rgba(74, 158, 255, 0.8)',
+                            borderColor: 'rgba(74, 158, 255, 1)',
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            title: { display: true, text: '不同侵蚀强度下的SOC含量', font: { size: 14 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'SOC (g/kg)' } },
+                            x: { title: { display: true, text: '侵蚀强度 (cm)' } }
+                        }
+                    }
+                });
+            }
+
+            function updateDepthChart(fert, erosion) {
+                const ctx = document.getElementById('depthChartCanvas').getContext('2d');
+                const depths = [10, 25, 35, 45, 55];
+                const labels = ['表层', '亚表层', '中层', '深层', '底层'];
+                const socValues = depths.map(d => SOCCalculator.baseData[fert][erosion][d]);
+
+                if (depthChart) depthChart.destroy();
+                depthChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `侵蚀${erosion}cm时SOC垂直分布`,
+                            data: socValues,
+                            borderColor: 'rgba(0, 217, 165, 1)',
+                            backgroundColor: 'rgba(0, 217, 165, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(0, 217, 165, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            title: { display: true, text: 'SOC含量的垂直分布特征', font: { size: 14 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'SOC (g/kg)' } },
+                            x: { title: { display: true, text: '土层深度' } }
+                        }
+                    }
+                });
+            }
+
+            function updateTimeChart() {
+                const ctx = document.getElementById('timeChartCanvas').getContext('2d');
+                const years = [0, 5, 10, 15, 20];
+                const fValues = [23.9, 21.5, 19.2, 17.8, 16.6];
+                const unfValues = [23.9, 22.1, 20.5, 19.1, 17.7];
+
+                if (timeChart) timeChart.destroy();
+                timeChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years.map(y => y + '年'),
+                        datasets: [
+                            {
+                                label: '施肥处理',
+                                data: fValues,
+                                borderColor: 'rgba(74, 158, 255, 1)',
+                                backgroundColor: 'rgba(74, 158, 255, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: '不施肥处理',
+                                data: unfValues,
+                                borderColor: 'rgba(233, 69, 96, 1)',
+                                backgroundColor: 'rgba(233, 69, 96, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            title: { display: true, text: 'SOC含量随时间变化趋势', font: { size: 14 } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'SOC (g/kg)' } },
+                            x: { title: { display: true, text: '种植年限 (年)' } }
+                        }
+                    }
+                });
+            }
+
+            function updateCompareTable() {
+                const tbody = document.getElementById('compareTableBody');
+                const data = [
+                    { fert: '施肥', erosion: 0, top: 23.90, subsurface: 16.64, middle: 13.09, deep: 10.30 },
+                    { fert: '施肥', erosion: 20, top: 11.77, subsurface: 8.48, middle: 6.84, deep: 5.77 },
+                    { fert: '施肥', erosion: 40, top: 12.51, subsurface: 11.50, middle: 8.80, deep: 8.28 },
+                    { fert: '施肥', erosion: 60, top: 8.82, subsurface: 9.81, middle: 8.36, deep: 8.20 },
+                    { fert: '不施肥', erosion: 0, top: 23.90, subsurface: 17.71, middle: 15.03, deep: 8.34 },
+                    { fert: '不施肥', erosion: 20, top: 21.03, subsurface: 17.02, middle: 15.03, deep: 11.93 },
+                    { fert: '不施肥', erosion: 40, top: 13.16, subsurface: 14.08, middle: 10.91, deep: 9.04 },
+                    { fert: '不施肥', erosion: 60, top: 10.53, subsurface: 10.80, middle: 8.80, deep: 8.30 }
+                ];
+
+                tbody.innerHTML = data.map(row => `
+                    <tr>
+                        <td>${row.fert}</td>
+                        <td>${row.erosion} cm</td>
+                        <td>${row.top}</td>
+                        <td>${row.subsurface}</td>
+                        <td>${row.middle}</td>
+                        <td>${row.deep}</td>
+                    </tr>
+                `).join('');
+            }
+
+            function validateParams() {
+                const params = getFormParams();
+                const errors = SOCCalculator.validateInput(params);
+                if (errors.length === 0) {
+                    alert('✓ 所有参数验证通过，范围均符合要求');
+                } else {
+                    alert('✗ 参数验证失败：\n' + errors.join('\n'));
+                }
+            }
+
+            function clearForm() {
+                document.getElementById('fert').value = 'F';
+                document.getElementById('erosion').value = '0';
+                document.getElementById('depth').value = '10';
+                document.getElementById('bd').value = '1.15';
+                document.getElementById('ph').value = '5.60';
+                document.getElementById('wc').value = '18.00';
+                document.getElementById('clay').value = '96.29';
+                document.getElementById('tn').value = '1.59';
+
+                document.getElementById('socValue').textContent = '--';
+                document.getElementById('carbonValue').textContent = '--';
+                document.getElementById('netChangeValue').textContent = '--';
+                document.getElementById('recoveryRateValue').textContent = '--';
+                document.getElementById('densityValue').textContent = '--';
+                document.getElementById('lossRateValue').textContent = '--';
+
+                document.getElementById('resultTableBody').innerHTML = '';
+                currentResults = null;
+            }
+
+            function scrollToResults() {
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('calculateBtn').addEventListener('click', performCalculation);
+                document.getElementById('validateBtn').addEventListener('click', validateParams);
+                document.getElementById('clearBtn').addEventListener('click', clearForm);
+
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', function () {
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        this.classList.add('active');
+                        document.getElementById(this.dataset.tab).classList.add('active');
+                    });
+                });
+
+                updateCompareTable();
+
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function() {
+                        navigator.serviceWorker.register('service-worker.js')
+                            .then(function(registration) {
+                                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                            })
+                            .catch(function(err) {
+                                console.log('ServiceWorker registration failed: ', err);
+                            });
+                    });
+                }
+            });
+        </script>
+</body>
+
+</html>
