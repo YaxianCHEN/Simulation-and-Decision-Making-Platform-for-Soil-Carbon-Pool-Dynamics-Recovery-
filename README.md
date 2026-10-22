@@ -1,0 +1,2 @@
+# Simulation-and-Decision-Making-Platform-for-Soil-Carbon-Pool-Dynamics-Recovery-
+Transform the SOC dynamic model that only exists in static formulas/charts in the master's thesis into an interactive multi-scenario deduction tool. I led the hierarchical decomposition of the model (decoupling of formula, parameter and rendering layers) and quantization verification, with AI-assisted front-end code implementation.
